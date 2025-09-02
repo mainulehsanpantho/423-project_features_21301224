@@ -54,9 +54,9 @@ rotation_speed = 2.0
 
 # Arena / goals
 arena_size = 500.0
-goal_size = 60.0
-goal_depth = 30.0
-wall_height = 50.0
+goal_size = 80.0
+goal_depth = 50.0
+wall_height = 60.0
 
 # Camera
 camera_distance = 380.0
@@ -488,12 +488,26 @@ def update_physics():
         ball_velocity[0] *= air_friction
         ball_velocity[1] *= air_friction
 
-    # Bound ball in arena
+    # Arena bounds (with bounce)
     half = arena_size / 2.0
-    max_x = half - ball_radius; max_y = half - ball_radius
-    ball_position[0] = max(-max_x, min(max_x, ball_position[0]))
-    ball_position[1] = max(-max_y, min(max_y, ball_position[1]))
+    max_x = half - ball_radius
+    max_y = half - ball_radius
 
+    # X boundary bounce
+    if ball_position[0] <= -max_x:
+        ball_position[0] = -max_x
+        ball_velocity[0] = -ball_velocity[0] * 0.8  # reflect with damping
+    elif ball_position[0] >= max_x:
+        ball_position[0] = max_x
+        ball_velocity[0] = -ball_velocity[0] * 0.8
+
+    # Y boundary bounce
+    if ball_position[1] <= -max_y:
+        ball_position[1] = -max_y
+        ball_velocity[1] = -ball_velocity[1] * 0.8
+    elif ball_position[1] >= max_y:
+        ball_position[1] = max_y
+        ball_velocity[1] = -ball_velocity[1] * 0.8
     # Goal detection (tuned): when ball crosses near edge and near ground and y velocity negative enough
     if ball_position[0] > (half - 30):
         if (ball_position[1] + ball_velocity[1] * global_dt * 30.0) <= -160.0 and ball_position[2] <= ball_radius + 2.0:
@@ -829,3 +843,4 @@ def init_glut():
 if __name__ == "__main__":
     init_glut()
     glutMainLoop()
+
